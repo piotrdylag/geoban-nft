@@ -148,7 +148,7 @@ while true; do
     bash "$here/geoban.sh" countries "$q" | sed 's/^/  /' || true
     continue
   fi
-  COUNTRIES=$(printf '%s' "$REPLY" | tr 'A-Z,' 'a-z ' | xargs)
+  COUNTRIES=${REPLY,,}; COUNTRIES=$(printf '%s' "${COUNTRIES//,/ }" | xargs)
   [[ -n $COUNTRIES ]] || { echo "  enter at least one code"; continue; }
   ok=1
   for cc in $COUNTRIES; do code_ok "$cc" || ok=0; done
@@ -160,7 +160,7 @@ done
 # --- protected country -------------------------------------------------------
 while true; do
   ask "YOUR OWN country code (will be refused as a block target, empty to skip)"
-  PROTECT=$(printf '%s' "$REPLY" | tr 'A-Z' 'a-z' | xargs)
+  PROTECT=$(printf '%s' "${REPLY,,}" | xargs)
   [[ -z $PROTECT ]] || code_ok "$PROTECT" || continue
   [[ -z $PROTECT ]] || echo "  $PROTECT = $(iso_name "$PROTECT" || echo '?')"
   hit=0
@@ -175,7 +175,7 @@ echo "What to block from those countries: 'all' = every port and protocol, SSH"
 echo "included; or a TCP port list such as 80,443 (the SSH port is then refused)."
 while true; do
   ask "Ports to block" "all"
-  PORTS=$(printf '%s' "$REPLY" | tr -d ' ' | tr 'A-Z' 'a-z')
+  PORTS=${REPLY// /}; PORTS=${PORTS,,}
   [[ $PORTS == all || $PORTS =~ ^[0-9]+(,[0-9]+)*$ ]] && break
   echo "  use 'all' or a list like 80,443"
 done

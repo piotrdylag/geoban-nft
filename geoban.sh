@@ -102,8 +102,8 @@ load_config() {
   # shellcheck disable=SC1090
   source "$CONF"
 
-  COUNTRIES=$(printf '%s' "$COUNTRIES" | tr 'A-Z,' 'a-z ')
-  PROTECT=$(printf '%s' "$PROTECT" | tr 'A-Z,' 'a-z ')
+  COUNTRIES=${COUNTRIES,,}; COUNTRIES=${COUNTRIES//,/ }
+  PROTECT=${PROTECT,,};     PROTECT=${PROTECT//,/ }
   [[ -n ${COUNTRIES// /} ]] || die "COUNTRIES is empty in $CONF"
   local cc p
   for p in $PROTECT; do check_code "$p" PROTECT; done
@@ -114,7 +114,7 @@ load_config() {
     done
   done
 
-  PORTS=$(printf '%s' "$PORTS" | tr -d ' ' | tr 'A-Z' 'a-z')
+  PORTS=${PORTS// /}; PORTS=${PORTS,,}
   if [[ $PORTS == all ]]; then
     # whole-host block: SSH from blocked countries is dropped too, so keep your
     # admin IP in ALLOW. Already-open sessions survive (ct state rule).
@@ -223,8 +223,11 @@ build() { # uses V4/V6 (per country) and PREV (old counter values, may be empty)
   printf 'table inet %s\n' "$TABLE"
   printf 'delete table inet %s\n' "$TABLE"
   printf 'table inet %s {\n' "$TABLE"
-  emit_set allow4 ipv4_addr "$( [[ ${#A4[@]} -gt 0 ]] && printf '%s\n' "${A4[@]}" | commas || true )"
-  emit_set allow6 ipv6_addr "$( [[ ${#A6[@]} -gt 0 ]] && printf '%s\n' "${A6[@]}" | commas || true )"
+  local e4="" e6=""
+  if (( ${#A4[@]} )); then e4=$(printf '%s\n' "${A4[@]}" | commas); fi
+  if (( ${#A6[@]} )); then e6=$(printf '%s\n' "${A6[@]}" | commas); fi
+  emit_set allow4 ipv4_addr "$e4"
+  emit_set allow6 ipv6_addr "$e6"
   for cc in $COUNTRIES; do
     emit_set "block4_$cc" ipv4_addr "$(printf '%s\n' "${V4[$cc]}" | commas)"
     if [[ $IPV6 == yes ]]; then
