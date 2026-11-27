@@ -1,0 +1,42 @@
+# geoban configuration: /etc/geoban/geoban.conf
+#
+# Shell syntax, sourced by geoban as root, so this file must be owned by root
+# and not writable by group/others (chmod 600). After editing run:
+#   sudo geoban apply
+# Check what would be loaded without changing anything:
+#   sudo geoban print
+
+# Countries to block: ISO 3166-1 alpha-2 codes, space or comma separated.
+# Required. Lists: https://www.ipdeny.com/ipblocks/
+COUNTRIES=""
+
+# Your own country (or several). geoban refuses to run if one of these is in
+# COUNTRIES, a guard against locking out your own customers or yourself.
+PROTECT=""
+
+# What to block from those countries:
+#   all      every port and protocol, SSH included (put your admin IP in ALLOW)
+#   80,443   only these TCP ports; a list containing the sshd port is refused
+PORTS="all"
+
+# Addresses that are never blocked: your own IP, monitoring, payment or
+# shipping callbacks, partners. IPv4/IPv6 addresses or CIDR, space separated.
+# Example: ALLOW="203.0.113.10 198.51.100.0/24 2001:db8::/32"
+ALLOW=""
+
+# drop   block matching traffic
+# count  only count what WOULD be blocked (dry run); check with: sudo geoban status
+MODE="count"
+
+# yes = also block the IPv6 ranges of those countries. Only matters if the
+# server is reachable over IPv6 (has a public IPv6 address / AAAA record).
+IPV6="no"
+
+# ---- advanced, rarely needed -------------------------------------------------
+# Download URLs for the country lists; %s is replaced by the country code.
+#URL4='https://www.ipdeny.com/ipblocks/data/countries/%s.zone'
+#URL6='https://www.ipdeny.com/ipv6/ipaddresses/blocks/%s.zone'
+
+# Offline/testing: read lists from $LOCAL_DIR/v4/<cc>.zone and v6/<cc>.zone
+# instead of downloading them.
+#LOCAL_DIR=""
